@@ -1,10 +1,3 @@
-"""
-Module 1 Assignment — Task 1.2
-MQTT Wildcard Subscriber
-
-Complete all TODO sections. Do not modify the function signatures.
-"""
-
 import json
 import logging
 import time
@@ -21,7 +14,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-# ── Configuration ─────────────────────────────────────────────────────────────
+
 BROKER_HOST  = "localhost"
 BROKER_PORT  = 1883
 CLIENT_ID    = "smartfactory-subscriber-001"
@@ -30,8 +23,7 @@ TOPIC_ALL        = "factory/#"
 TOPIC_TEMP       = "factory/+/temperature"
 
 CRITICAL_TEMP    = 85.0
-SUMMARY_INTERVAL = 30   # seconds
-
+SUMMARY_INTERVAL = 30   
 
 class SmartFactorySubscriber:
     """Subscribes to SmartFactory sensor topics and processes incoming data."""
@@ -47,7 +39,7 @@ class SmartFactorySubscriber:
         self._client.on_connect = self.on_connect
         self._client.on_message = self.on_message
 
-    # ── Connection ─────────────────────────────────────────────────────────────
+
 
     def on_connect(self, client, userdata, flags: dict, rc: int) -> None:
         """
@@ -55,16 +47,16 @@ class SmartFactorySubscriber:
         """
         if rc == 0:
             log.info("Connected to broker")
-            # All factory messages at QoS 1
+           
             client.subscribe(TOPIC_ALL, qos=1)
-            # Temperature readings only at QoS 2 (separate subscription)
+       
             client.subscribe(TOPIC_TEMP, qos=2)
             log.info("Subscribed to '%s' (QoS 1) and '%s' (QoS 2)",
                      TOPIC_ALL, TOPIC_TEMP)
         else:
             log.error("Connection failed with rc=%s", rc)
 
-    # ── Message Handling ───────────────────────────────────────────────────────
+ 
 
     def on_message(self, client, userdata, msg: mqtt.MQTTMessage) -> None:
         """
@@ -72,7 +64,7 @@ class SmartFactorySubscriber:
         """
         self._msg_counts[msg.topic] += 1
 
-        # Parse payload
+   
         try:
             payload: Any = json.loads(msg.payload.decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
@@ -83,7 +75,7 @@ class SmartFactorySubscriber:
         if msg.topic.endswith("/temperature"):
             self._check_temperature_alert(msg.topic, payload)
 
-        # Periodic summary
+ 
         now = time.time()
         if now - self._last_summary >= SUMMARY_INTERVAL:
             self._print_summary()
@@ -140,7 +132,7 @@ class SmartFactorySubscriber:
         )
         print("─────────────────────────────────────────")
 
-    # ── Run ────────────────────────────────────────────────────────────────────
+   
 
     def run(self) -> None:
         """Connect and block until interrupted."""
@@ -154,7 +146,7 @@ class SmartFactorySubscriber:
             self._client.disconnect()
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     sub = SmartFactorySubscriber()
     sub.run()
