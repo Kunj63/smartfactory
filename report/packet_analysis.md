@@ -31,11 +31,6 @@
 | 1 | Clean session | 1 | Clean session = false (persistent) |
 | 0 | Reserved | 0 | — |
 
-> **Note:** In our implementation `clean_session=False` sets bit 1 to 0. With the
-> LWT configured the Will flag (bit 2) = 1 and Will QoS (bits 4–3) = 01 (QoS 1),
-> Will retain = 1.  The exact hex byte observed will be `0x26` (0010 0110) when only
-> LWT is set and no username/password are used.  Values above reflect a broker
-> capture where default credentials were enabled.
 
 ---
 
@@ -191,13 +186,7 @@ Bytes: 01  00 01  00 00 00 NN  [payload]  CE
 | Payload | _(empty)_ |
 | Frame End | `CE` |
 
-**Why is the Heartbeat payload empty?**
-
-> The AMQP Heartbeat frame (type 8) exists solely as a keep-alive signal — its
-> purpose is to prove the TCP connection is still alive, not to carry data.
-> No application information is needed, so the payload length is zero and the
-> frame body is omitted entirely, keeping the overhead to just 8 bytes per heartbeat.
 
 ---
 
-*Module 1 Assignment — Real-Time Data Analytics for IoT*
+*Module 2 Assignment — Real-Time Data Analytics for IoT*
