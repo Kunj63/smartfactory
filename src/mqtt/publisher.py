@@ -1,11 +1,3 @@
-"""
-Module 1 Assignment — Task 1.1
-MQTT Sensor Publisher
-
-Complete all TODO sections. Do not modify the function signatures
-or the SensorReading dataclass — the tests depend on them.
-"""
-
 import json
 import logging
 import random
@@ -23,7 +15,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-# ── Configuration ─────────────────────────────────────────────────────────────
+
 BROKER_HOST = "localhost"
 BROKER_PORT = 1883
 CLIENT_ID   = "smartfactory-publisher-001"
@@ -58,7 +50,7 @@ class SmartFactoryPublisher:
         self._client: Optional[mqtt.Client] = None
         self._connected = False
 
-    # ── Connection ─────────────────────────────────────────────────────────────
+    
 
     def _build_client(self) -> mqtt.Client:
         """
@@ -68,8 +60,7 @@ class SmartFactoryPublisher:
         client.on_connect = self.on_connect
         client.on_publish = self.on_publish
 
-        # Set LWT for line1 (paho supports only one LWT per client;
-        # tests only verify line1 LWT)
+     
         client.will_set(
             topic=f"factory/line1/status",
             payload="offline",
@@ -87,7 +78,7 @@ class SmartFactoryPublisher:
         self._client.connect(self.broker_host, self.broker_port, keepalive=60)
         self._client.loop_start()
 
-        # Wait up to 5 seconds for the connection to establish
+       
         deadline = time.time() + 5.0
         while not self._connected and time.time() < deadline:
             time.sleep(0.05)
@@ -95,7 +86,7 @@ class SmartFactoryPublisher:
         if not self._connected:
             log.warning("Connection timeout — proceeding anyway")
 
-        # Publish retained 'online' status for each line
+     
         for line in LINES:
             self._client.publish(
                 f"factory/{line}/status", "online", qos=1, retain=True
@@ -114,8 +105,6 @@ class SmartFactoryPublisher:
         self._client.disconnect()
         log.info("Disconnected cleanly")
 
-    # ── Callbacks ──────────────────────────────────────────────────────────────
-
     def on_connect(self, client, userdata, flags, rc: int) -> None:
         """TODO 3: Handle broker connection result."""
         if rc == 0:
@@ -128,7 +117,7 @@ class SmartFactoryPublisher:
         """TODO 4: Log PUBACK acknowledgement."""
         log.debug("PUBACK received for mid=%s", mid)
 
-    # ── Sensor Simulation ──────────────────────────────────────────────────────
+   
 
     def _simulate_reading(self, line: str, sensor: str) -> SensorReading:
         """Generate a realistic simulated sensor reading with Gaussian noise."""
@@ -152,7 +141,7 @@ class SmartFactoryPublisher:
         """
         return f"factory/{line}/{sensor}"
 
-    # ── Publishing ─────────────────────────────────────────────────────────────
+    
 
     def publish_reading(self, line: str, sensor: str) -> SensorReading:
         """
@@ -170,7 +159,7 @@ class SmartFactoryPublisher:
         )
         return reading
 
-    # ── Main Loop ──────────────────────────────────────────────────────────────
+
 
     def run(self, interval_s: float = 1.0) -> None:
         """Continuously publish all sensors until interrupted."""
@@ -188,7 +177,7 @@ class SmartFactoryPublisher:
             self.disconnect()
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     pub = SmartFactoryPublisher()
     pub.run()
