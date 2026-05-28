@@ -1,12 +1,3 @@
-"""
-Module 1 Assignment — Task 2.1
-CoAP Sensor Resource Server
-
-Complete all TODO sections. The resource classes must match the
-URIs and behaviours listed in the assignment spec.
-
-Run with:  python -m src.coap.server
-"""
 
 import asyncio
 import json
@@ -23,7 +14,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-# ── Sensor simulation helpers ─────────────────────────────────────────────────
+
 
 SENSOR_CONFIG = {
     "temperature": {"unit": "C",    "base": 70.0, "noise": 3.0},
@@ -43,7 +34,7 @@ def _json(data: dict) -> bytes:
     return json.dumps(data).encode()
 
 
-# ── Observable Sensor Resource ────────────────────────────────────────────────
+
 
 class SensorResource(resource.ObservableResource):
     """
@@ -57,7 +48,7 @@ class SensorResource(resource.ObservableResource):
         self.line        = line
         self.sensor_type = sensor_type
         self._reading    = _sim(sensor_type)
-        # Start the background update loop
+     
         asyncio.ensure_future(self._update_loop())
 
     async def _update_loop(self) -> None:
@@ -72,7 +63,7 @@ class SensorResource(resource.ObservableResource):
                 self.line, self.sensor_type,
                 self._reading["value"], self._reading["unit"],
             )
-            # Notify all registered Observe subscribers
+      
             self.updated_state()
 
     async def render_get(self, request: Message) -> Message:
@@ -87,7 +78,7 @@ class SensorResource(resource.ObservableResource):
         )
 
 
-# ── Actuator Resource ─────────────────────────────────────────────────────────
+
 
 class ActuatorResource(resource.Resource):
     """
@@ -130,7 +121,7 @@ class ActuatorResource(resource.Resource):
         return Message(code=Code.CHANGED)
 
 
-# ── Block-wise Manifest Resource ──────────────────────────────────────────────
+
 
 class ManifestResource(resource.Resource):
     """
@@ -140,7 +131,7 @@ class ManifestResource(resource.Resource):
     The payload is built once at class level to avoid repeated generation.
     """
 
-    _PAYLOAD: bytes = b""  # filled in _build_payload()
+    _PAYLOAD: bytes = b"" 
 
     @classmethod
     def _build_payload(cls) -> bytes:
@@ -199,7 +190,6 @@ class ManifestResource(resource.Resource):
         )
 
 
-# ── Resource Tree & Server Setup ──────────────────────────────────────────────
 
 async def build_server() -> aiocoap.Context:
     """
@@ -207,7 +197,7 @@ async def build_server() -> aiocoap.Context:
     """
     root = resource.Site()
 
-    # Factory line sensors
+  
     root.add_resource(
         ["factory", "line1", "temperature"],
         SensorResource("line1", "temperature"),
@@ -225,26 +215,25 @@ async def build_server() -> aiocoap.Context:
         SensorResource("line2", "temperature"),
     )
 
-    # Actuator
+
     root.add_resource(
         ["actuator", "line1", "fan"],
         ActuatorResource(),
     )
 
-    # Large manifest resource (triggers Block2)
+ 
     root.add_resource(
         ["factory", "manifest"],
         ManifestResource(),
     )
 
-    # CoRE Link Format resource discovery
+ 
     root.add_resource(
         [".well-known", "core"],
         resource.WKCResource(root.get_resources_as_linkheader),
     )
 
-    # Explicitly bind to 127.0.0.1 — required on Windows because aiocoap
-    # cannot bind to the any-address (0.0.0.0) on that platform.
+
     context = await aiocoap.Context.create_server_context(root, bind=("127.0.0.1", 5683))
     return context
 
@@ -256,7 +245,7 @@ async def main() -> None:
         "Resources: /factory/line{1,2}/{temperature,vibration,power}, "
         "/actuator/line1/fan, /factory/manifest"
     )
-    # Run until cancelled
+ 
     await asyncio.get_event_loop().create_future()
 
 
