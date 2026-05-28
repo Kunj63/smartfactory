@@ -1,11 +1,3 @@
-"""
-Module 1 Assignment — Task 2.2
-CoAP Observer Client
-
-Complete all TODO sections.
-
-Run with:  python -m src.coap.observer
-"""
 
 import asyncio
 import json
@@ -21,9 +13,9 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 SERVER_BASE      = "coap://127.0.0.1"
-OBSERVE_DURATION = 60   # seconds before clean deregister
+OBSERVE_DURATION = 60   
 
-# Observe sequence numbers wrap at 2^24
+
 _OBS_WRAP = 1 << 24
 
 
@@ -32,10 +24,9 @@ class FactoryObserver:
 
     def __init__(self):
         self._ctx  = None
-        self._last_seq:   dict[str, int] = {}   # uri -> last observe seq
-        self._stale_count: dict[str, int] = {}  # uri -> stale count
-
-    # ── Setup ──────────────────────────────────────────────────────────────────
+        self._last_seq:   dict[str, int] = {}   
+        self._stale_count: dict[str, int] = {}  
+ 
 
     async def start(self) -> None:
         """Create the aiocoap client context."""
@@ -46,7 +37,7 @@ class FactoryObserver:
         if self._ctx:
             await self._ctx.shutdown()
 
-    # ── Observation ────────────────────────────────────────────────────────────
+ 
 
     async def observe_resource(self, uri: str) -> None:
         """
@@ -57,8 +48,7 @@ class FactoryObserver:
         request = Message(code=Code.GET, uri=uri, observe=0)
         pr = self._ctx.request(request)
 
-        # Wrap the async-for loop in a timeout so we deregister after
-        # OBSERVE_DURATION seconds.
+    
         async def _consume():
             async for response in pr.observation:
                 self._handle_notification(uri, response)
@@ -77,16 +67,13 @@ class FactoryObserver:
         """
         seq = response.opt.observe
         if seq is None:
-            # Not an Observe notification — treat as plain response
+          
             return
 
         last = self._last_seq.get(uri, -1)
 
-        # Stale check: RFC 7641 §3.4
-        # A notification is stale if its sequence number is not greater than
-        # the previous one (accounting for modular wrap-around).
         if last >= 0:
-            # "greater than" in the modular sense: diff in (0, 2^23]
+     
             forward_diff = (seq - last) % _OBS_WRAP
             if forward_diff == 0 or forward_diff > (_OBS_WRAP >> 1):
                 self._stale_count[uri] = self._stale_count.get(uri, 0) + 1
@@ -106,7 +93,7 @@ class FactoryObserver:
         except (ValueError, UnicodeDecodeError):
             log.info("[OBSERVE] %s  seq=%d  payload=%r", uri, seq, response.payload)
 
-    # ── Block2 Transfer ────────────────────────────────────────────────────────
+
 
     async def fetch_manifest(self) -> None:
         """
@@ -122,7 +109,7 @@ class FactoryObserver:
         payload = response.payload
         log.info("Manifest received: %d bytes", len(payload))
 
-        # Count top-level firmware entries
+     
         try:
             data    = json.loads(payload.decode("utf-8"))
             entries = data.get("firmware_entries", data if isinstance(data, list) else [])
@@ -131,7 +118,7 @@ class FactoryObserver:
         except (ValueError, UnicodeDecodeError):
             log.warning("Manifest payload is not valid JSON")
 
-        # Report Block2 option if present (manual block tracking)
+      
         block2 = getattr(response.opt, "block2", None)
         if block2 is not None:
             log.info(
@@ -141,7 +128,7 @@ class FactoryObserver:
 
         log.info("Block2 transfer complete")
 
-    # ── Run ────────────────────────────────────────────────────────────────────
+   
 
     async def run(self) -> None:
         """
@@ -149,7 +136,7 @@ class FactoryObserver:
         """
         await self.start()
         try:
-            # Observe both temperature resources simultaneously
+   
             await asyncio.gather(
                 self.observe_resource(
                     f"{SERVER_BASE}/factory/line1/temperature"
@@ -159,10 +146,10 @@ class FactoryObserver:
                 ),
             )
 
-            # After observations complete, fetch the large manifest
+
             await self.fetch_manifest()
 
-            # Final summary
+
             print("\n── Stale Notification Summary ──────────────────")
             if self._stale_count:
                 for uri, count in self._stale_count.items():
@@ -175,7 +162,6 @@ class FactoryObserver:
             await self.stop()
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import sys
     if sys.platform == "win32":
