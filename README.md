@@ -1,6 +1,6 @@
-# Module 1 Assignment — SmartFactory IoT Protocol Integration
+# Module 2 Assignment — SmartFactory IoT Protocol Integration
 
-**Real-Time Data Analytics for IoT** · Graduate Course · Module 1
+**Real-Time Data Analytics for IoT** · Graduate Course · Module 2
 
 ---
 
@@ -130,18 +130,3 @@ docker compose logs -f rabbitmq
 ```
 
 ---
-
-## Submission Checklist
-
-Before zipping and submitting:
-
-- [ ] All 7 source files have TODO sections completed
-- [ ] `pytest tests/ -v` passes (or partial passes documented)
-- [ ] `captures/` contains mqtt.pcap, coap.pcap, amqp.pcap
-- [ ] `report/packet_analysis.md` — all annotation tables filled in
-- [ ] `report/comparison_report.md` — all sections written (1500–2000 words total)
-- [ ] README.md updated with your name and any notes for the marker
-
----
-
-*Graduate Course: Real-Time Data Analytics for IoT · Module 1*
